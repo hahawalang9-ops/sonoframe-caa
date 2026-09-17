@@ -98,19 +98,6 @@
             justify-content: center;
         }
 
-        .control-panel label {
-            font-weight: 600;
-            color: #444444;
-        }
-
-        .control-panel input,
-        .control-panel select {
-            padding: 8px 12px;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
         .btn {
             padding: 10px 24px;
             border: none;
@@ -151,7 +138,7 @@
 
         .status-card {
             flex: 1;
-            min-width: 180px;
+            min-width: 150px;
             background-color: #f8f9fa;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
@@ -160,7 +147,7 @@
         }
 
         .status-card .label {
-            font-size: 12px;
+            font-size: 11px;
             color: #888888;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -168,7 +155,7 @@
         }
 
         .status-card .value {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: #1a1a2e;
         }
@@ -181,16 +168,68 @@
             color: #dc3545;
         }
 
-        .status-card .value.bvid {
-            color: #ffc107;
-        }
-
         .status-card .value.deep {
             color: #fd7e14;
         }
 
         .status-card .value.wide {
             color: #dc3545;
+        }
+
+        /* ============================================================
+           VETO COMPARISON SECTION
+           ============================================================ */
+        .veto-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .veto-card {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .veto-card h3 {
+            font-size: 16px;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .veto-card.with-veto h3 {
+            color: #28a745;
+        }
+
+        .veto-card.without-veto h3 {
+            color: #dc3545;
+        }
+
+        .veto-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eeeeee;
+            font-size: 14px;
+        }
+
+        .veto-row:last-child {
+            border-bottom: none;
+        }
+
+        .veto-row .key {
+            color: #777777;
+        }
+
+        .veto-row .val {
+            font-weight: 600;
+            color: #1a1a2e;
         }
 
         /* ============================================================
@@ -230,13 +269,13 @@
         .map-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
         #damageMap {
             width: 100%;
-            height: 400px;
+            height: 300px;
             background-color: #f0f4f8;
             border: 2px solid #cccccc;
             border-radius: 8px;
@@ -303,8 +342,8 @@
         .map-label {
             position: absolute;
             bottom: 10px;
-            left: 10px;
-            font-size: 12px;
+            right: 10px;
+            font-size: 11px;
             color: #888888;
         }
 
@@ -335,11 +374,15 @@
             }
 
             .status-card .value {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             canvas {
                 height: 200px;
+            }
+
+            .veto-card {
+                min-width: 100%;
             }
         }
     </style>
@@ -368,18 +411,11 @@
 
         <!-- Control Panel -->
         <div class="control-panel">
-            <label for="specimenSelect">Specimen:</label>
-            <select id="specimenSelect">
-                <option value="I-01">I-01 (Intact)</option>
-                <option value="B-01">B-01 (BVID)</option>
-                <option value="M-01">M-01 (Moderate)</option>
-                <option value="S-01">S-01 (Severe)</option>
-            </select>
-            <button class="btn btn-primary" onclick="loadData()">Load Data</button>
+            <button class="btn btn-primary" onclick="loadData()">Run Analysis</button>
             <button class="btn btn-secondary" onclick="resetData()">Reset</button>
         </div>
 
-        <!-- Status Bar -->
+        <!-- Status Bar (WITH VETO) -->
         <div class="status-bar">
             <div class="status-card">
                 <div class="label">Status</div>
@@ -400,6 +436,56 @@
             <div class="status-card">
                 <div class="label">Valid Rx</div>
                 <div class="value" id="validRxValue">0/6</div>
+            </div>
+        </div>
+
+        <!-- Veto Comparison Section -->
+        <div class="veto-section">
+            <div class="veto-card with-veto">
+                <h3>WITH TOA VETO LOGIC</h3>
+                <div class="veto-row">
+                    <span class="key">Status:</span>
+                    <span class="val" id="vetoStatus">NOMINAL</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Type:</span>
+                    <span class="val" id="vetoType">---</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Location:</span>
+                    <span class="val" id="vetoLocation">--- mm</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Energy Loss:</span>
+                    <span class="val" id="vetoLoss">--- %</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Valid Rx:</span>
+                    <span class="val" id="vetoValidRx">0/6</span>
+                </div>
+            </div>
+            <div class="veto-card without-veto">
+                <h3>WITHOUT TOA VETO LOGIC</h3>
+                <div class="veto-row">
+                    <span class="key">Status:</span>
+                    <span class="val" id="noVetoStatus">NOMINAL</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Type:</span>
+                    <span class="val" id="noVetoType">---</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Location:</span>
+                    <span class="val" id="noVetoLocation">--- mm</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Energy Loss:</span>
+                    <span class="val" id="noVetoLoss">--- %</span>
+                </div>
+                <div class="veto-row">
+                    <span class="key">Valid Rx:</span>
+                    <span class="val" id="noVetoValidRx">0/6</span>
+                </div>
             </div>
         </div>
 
@@ -426,10 +512,10 @@
              ============================================================ -->
         <div class="section" id="damage-map">
             <h2>2D Damage Map</h2>
-            <p>Estimated damage location on the specimen (400 mm × 100 mm)</p>
+            <p>Estimated damage location on the tested structure</p>
             <div class="map-container">
                 <div id="damageMap">
-                    <div class="map-label">Specimen: 400 mm × 100 mm</div>
+                    <div class="map-label">Damage Location Map</div>
                 </div>
             </div>
             <div class="map-legend">
@@ -454,7 +540,7 @@
          FOOTER
          ============================================================ -->
     <footer>
-        &copy; 2026 SONOFRAME Research Team | Cebu City National Science High School
+        &copy; 2026 SONOFRAME Research Team
     </footer>
 
     <!-- ============================================================
@@ -477,10 +563,10 @@
         };
 
         // ============================================================
-        // SPECIMEN DATA (Simulated - Replace with real data from ESP32)
+        // SIMULATED DATA (Replace with real data from ESP32)
         // ============================================================
-        const specimenData = {
-            'I-01': {
+        const testData = {
+            'NOMINAL': {
                 status: 'NOMINAL',
                 type: '---',
                 location: null,
@@ -490,27 +576,17 @@
                 mapY: 50,
                 mapColor: '#28a745'
             },
-            'B-01': {
+            'DEEP CRACK': {
                 status: 'WARNING',
-                type: 'BVID',
+                type: 'DEEP CRACK',
                 location: 215,
-                loss: 18,
+                loss: 22,
                 validRx: 5,
                 mapX: 215,
                 mapY: 50,
                 mapColor: '#ffc107'
             },
-            'M-01': {
-                status: 'WARNING',
-                type: 'DEEP CRACK',
-                location: 220,
-                loss: 24,
-                validRx: 5,
-                mapX: 220,
-                mapY: 50,
-                mapColor: '#fd7e14'
-            },
-            'S-01': {
+            'WIDE CRACK': {
                 status: 'WARNING',
                 type: 'WIDE CRACK',
                 location: 215,
@@ -526,12 +602,12 @@
         // LOAD DATA
         // ============================================================
         function loadData() {
-            const specimen = document.getElementById('specimenSelect').value;
-            const data = specimenData[specimen];
+            // Simulate random damage type for demonstration
+            const types = ['NOMINAL', 'DEEP CRACK', 'WIDE CRACK'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            const data = testData[randomType];
 
-            if (!data) return;
-
-            // Update current data
+            // Update current data (WITH VETO)
             currentData.status = data.status;
             currentData.type = data.type;
             currentData.location = data.location;
@@ -539,6 +615,7 @@
             currentData.validRx = data.validRx;
             currentData.mapX = data.mapX;
             currentData.mapY = data.mapY;
+            currentData.mapColor = data.mapColor;
 
             // Generate simulated waveform
             currentData.waveform = generateWaveform(data.type);
@@ -548,11 +625,12 @@
 
             // Update UI
             updateStatusBar();
+            updateVetoCards();
             drawWaveform();
             drawFFT();
             drawDamageMap();
 
-            console.log('Loaded data for specimen:', specimen);
+            console.log('Analysis complete for:', randomType);
         }
 
         // ============================================================
@@ -571,6 +649,7 @@
                 mapY: 50
             };
             updateStatusBar();
+            updateVetoCards();
             drawWaveform();
             drawFFT();
             drawDamageMap();
@@ -592,8 +671,7 @@
 
             // Type
             typeEl.textContent = currentData.type;
-            if (currentData.type === 'BVID') typeEl.className = 'value bvid';
-            else if (currentData.type === 'DEEP CRACK') typeEl.className = 'value deep';
+            if (currentData.type === 'DEEP CRACK') typeEl.className = 'value deep';
             else if (currentData.type === 'WIDE CRACK') typeEl.className = 'value wide';
             else typeEl.className = 'value';
 
@@ -605,6 +683,28 @@
 
             // Valid Rx
             validRxEl.textContent = currentData.validRx + '/6';
+        }
+
+        // ============================================================
+        // UPDATE VETO CARDS
+        // ============================================================
+        function updateVetoCards() {
+            // WITH VETO
+            document.getElementById('vetoStatus').textContent = currentData.status;
+            document.getElementById('vetoType').textContent = currentData.type;
+            document.getElementById('vetoLocation').textContent = currentData.location ? currentData.location + ' mm' : '--- mm';
+            document.getElementById('vetoLoss').textContent = currentData.loss ? currentData.loss + ' %' : '--- %';
+            document.getElementById('vetoValidRx').textContent = currentData.validRx + '/6';
+
+            // WITHOUT VETO (slightly different values to simulate noise)
+            const noVetoValidRx = currentData.validRx + 1 > 6 ? 6 : currentData.validRx + 1;
+            const noVetoLoss = Math.max(0, currentData.loss - 2);
+
+            document.getElementById('noVetoStatus').textContent = currentData.status;
+            document.getElementById('noVetoType').textContent = currentData.type;
+            document.getElementById('noVetoLocation').textContent = currentData.location ? (currentData.location - 5) + ' mm' : '--- mm';
+            document.getElementById('noVetoLoss').textContent = noVetoLoss ? noVetoLoss + ' %' : '--- %';
+            document.getElementById('noVetoValidRx').textContent = noVetoValidRx + '/6';
         }
 
         // ============================================================
@@ -622,9 +722,6 @@
             } else if (type === 'DEEP CRACK') {
                 amplitude = 0.6;
                 noise = 0.10;
-            } else if (type === 'BVID') {
-                amplitude = 0.7;
-                noise = 0.07;
             }
 
             for (let i = 0; i < samples; i++) {
@@ -650,8 +747,6 @@
 
                 if (type === 'NOMINAL' || type === '---') {
                     magnitude = Math.exp(-Math.pow((freq - 0.15) / 0.05, 2)) * 0.8;
-                } else if (type === 'BVID') {
-                    magnitude = Math.exp(-Math.pow((freq - 0.12) / 0.06, 2)) * 0.6;
                 } else if (type === 'DEEP CRACK') {
                     magnitude = Math.exp(-Math.pow((freq - 0.08) / 0.08, 2)) * 0.5;
                 } else if (type === 'WIDE CRACK') {
@@ -672,17 +767,13 @@
             const canvas = document.getElementById('waveformCanvas');
             const ctx = canvas.getContext('2d');
 
-            // Set canvas size
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
 
             const width = canvas.width;
             const height = canvas.height;
 
-            // Clear
             ctx.clearRect(0, 0, width, height);
-
-            // Background
             ctx.fillStyle = '#fafafa';
             ctx.fillRect(0, 0, width, height);
 
@@ -729,7 +820,7 @@
 
             ctx.stroke();
 
-            // Label
+            // Labels
             ctx.fillStyle = '#888888';
             ctx.font = '12px Segoe UI';
             ctx.fillText('Amplitude', 10, 20);
@@ -749,10 +840,7 @@
             const width = canvas.width;
             const height = canvas.height;
 
-            // Clear
             ctx.clearRect(0, 0, width, height);
-
-            // Background
             ctx.fillStyle = '#fafafa';
             ctx.fillRect(0, 0, width, height);
 
@@ -785,13 +873,12 @@
                 const x = i * barWidth;
                 const y = height - barHeight;
 
-                // Color based on magnitude
                 const intensity = Math.floor(fft[i] * 255);
                 ctx.fillStyle = `rgb(${74 + intensity * 0.3}, ${144 - intensity * 0.2}, ${217 - intensity * 0.3})`;
                 ctx.fillRect(x, y, barWidth - 1, barHeight);
             }
 
-            // Label
+            // Labels
             ctx.fillStyle = '#888888';
             ctx.font = '12px Segoe UI';
             ctx.fillText('Magnitude', 10, 20);
@@ -816,7 +903,6 @@
             let color = '#28a745'; // Green (NOMINAL)
             if (currentData.type === 'WIDE CRACK') color = '#dc3545'; // Red
             else if (currentData.type === 'DEEP CRACK') color = '#ffc107'; // Yellow
-            else if (currentData.type === 'BVID') color = '#ffc107'; // Yellow
 
             // Draw gradient overlay (damage zone)
             const gradient = document.createElement('div');
@@ -826,7 +912,9 @@
             gradient.style.top = '0';
             gradient.style.width = '100%';
             gradient.style.height = '100%';
-            gradient.style.background = `radial-gradient(ellipse at ${(currentData.mapX / 400) * 100}% 50%, ${color}33 0%, transparent 40%)`;
+            // Use relative positioning based on location (0-400mm range)
+            const relativeX = currentData.location ? (currentData.location / 400) * 100 : 50;
+            gradient.style.background = `radial-gradient(ellipse at ${relativeX}% 50%, ${color}33 0%, transparent 40%)`;
             gradient.style.pointerEvents = 'none';
             map.appendChild(gradient);
 
@@ -834,7 +922,7 @@
             if (currentData.type !== '---' && currentData.type !== 'NOMINAL') {
                 const marker = document.createElement('div');
                 marker.className = 'map-marker';
-                marker.style.left = ((currentData.mapX / 400) * 100) + '%';
+                marker.style.left = relativeX + '%';
                 marker.style.top = '50%';
                 marker.style.backgroundColor = color;
                 marker.textContent = '!';
@@ -846,7 +934,10 @@
         // INITIALIZE
         // ============================================================
         window.addEventListener('load', function() {
+            // Load initial data
             loadData();
+            
+            // Redraw on window resize
             window.addEventListener('resize', function() {
                 drawWaveform();
                 drawFFT();
